@@ -27,6 +27,7 @@ if(not os.path.exists('config.ini')):
     parser['settings'] = {
         'isRunning' : "true",
         'getHashes' : "true",
+        'hashMethod' : "MD5",
         'currentPathName' : "Images"
     }
     with open('config.ini', 'w') as f:
