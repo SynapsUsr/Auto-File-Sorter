@@ -19,6 +19,7 @@ isRunning = False
 
 getHashes = False
 
+hashCode = "MD5"
 
 parser = ConfigParser()
 
@@ -41,6 +42,7 @@ if(not os.path.exists('filePaths.json')):
 parser.read('config.ini')
 
 currentPath = parser.get('settings', 'currentPathName')
+hashCode = parser.get('settings', 'hashMethod')
 if(parser.get('settings', 'getHashes') == 'true'):
     getHashes = True
 if(parser.get('settings', 'getHashes') == 'false'):
@@ -50,12 +52,20 @@ if(parser.get('settings', 'isRunning') == 'true'):
 if(parser.get('settings', 'isRunning') == 'false'):
     isRunning = False
 
-def md5(fname):
-    hash_md5 = hashlib.md5()
+hash_ = hashlib.md5()
+
+if(hashCode == 'MD5'): hash_ = hashlib.md5()
+if(hashCode == 'SHA-1'): hash_ = hashlib.sha1()
+if(hashCode == 'SHA-256'): hash_ = hashlib.sha256()
+if(hashCode == 'SHA-224'): hash_ = hashlib.sha224()
+    
+
+def hashFile(fname):
     with open(fname, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+            hash_.update(chunk)
+    return hash_.hexdigest()
+
 
 def main():
     onlyfiles = [f for f in listdir(currentPath) if isfile(join(currentPath, f))]
@@ -68,7 +78,7 @@ def main():
                 if(getHashes == True):
                     if not os.path.exists("/fileHashes.json"):
                         os.makedirs("/fileHashes.json")
-                    hashStore.update({ b + " | " + file.replace(b + " ", "") : md5(b + "/" + file.replace(b + " ", ""))})
+                    hashStore.update({ b + " | " + file.replace(b + " ", "") : hashFile(b + "/" + file.replace(b + " ", ""))})
                     json.dump(hashStore, open('fileHashes.json', 'w', encoding='utf-8'))
                     with open('fileHashes.json', 'w') as outfile:
                         json.dump(hashStore, outfile, ensure_ascii=False, indent=4)
